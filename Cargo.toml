@@ -1,0 +1,28 @@
+[package]
+name = "velodock"
+version = "0.3.2"
+edition = "2021"
+description = "VeloDock — A native, ultra-smooth desktop Dock for Arch Linux (Wayland & X11) with spring physics and 11 dock styles"
+repository = "https://github.com/TheFarNickel/Velo-dock"
+license = "MIT"
+
+[dependencies]
+gtk4 = { version = "0.11", features = ["v4_12"] }
+gtk4-layer-shell = { version = "0.9", features = ["v1_3"] }
+x11rb = "0.14"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+async-channel = "2"
+dirs = "5"
+chrono = "0.4"
+percent-encoding = "2"
+shlex = "1"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

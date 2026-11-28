@@ -1,0 +1,44 @@
+# Maintainer: TheFarNickel
+pkgname=velodock
+pkgver=0.3.2
+pkgrel=1
+pkgdesc="VeloDock — Ultra-smooth desktop Dock for Arch Linux (Wayland & X11) with spring physics and 11 dock styles"
+arch=('x86_64' 'aarch64')
+url="https://github.com/TheFarNickel/Velo-dock"
+license=('MIT')
+depends=('gtk4' 'gtk4-layer-shell')
+makedepends=('cargo')
+options=('!debug')
+source=()
+sha256sums=()
+
+build() {
+    cd "$startdir/.."
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --release
+}
+
+check() {
+    cd "$startdir/.."
+    cargo test --release
+}
+
+package() {
+    cd "$startdir/.."
+    install -Dm755 "target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
+    install -Dm644 "packaging/$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+    install -Dm644 "packaging/$pkgname-settings.desktop" "$pkgdir/usr/share/applications/$pkgname-settings.desktop"
+    install -Dm644 "assets/icons/$pkgname.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/$pkgname.svg"
+    install -Dm644 "assets/icons/$pkgname-settings.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/$pkgname-settings.svg"
+    install -Dm644 "assets/icons/$pkgname-128.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/$pkgname.png"
+    install -Dm644 "assets/icons/$pkgname-settings-128.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/$pkgname-settings.png"
+    install -Dm644 "assets/icons/$pkgname-256.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/$pkgname.png"
+    install -Dm644 "assets/icons/$pkgname-settings-256.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/$pkgname-settings.png"
+    install -Dm644 "assets/icons/$pkgname-128.png" "$pkgdir/usr/share/pixmaps/$pkgname.png"
+    install -Dm644 "assets/icons/$pkgname-settings-128.png" "$pkgdir/usr/share/pixmaps/$pkgname-settings.png"
+    install -Dm644 "assets/icons/$pkgname.svg" "$pkgdir/usr/share/pixmaps/$pkgname.svg"
+    install -Dm644 "assets/icons/$pkgname-settings.svg" "$pkgdir/usr/share/pixmaps/$pkgname-settings.svg"
+    install -Dm644 "LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 "README.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
+}

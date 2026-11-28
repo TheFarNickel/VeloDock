@@ -1,0 +1,11 @@
+/target
+/dist
+/.superpowers
+Cargo.lock
+*.bak
+*.pkg.tar.*
+packaging/src/
+packaging/pkg/
+packaging/aur-bin/src/
+packaging/aur-bin/pkg/
+*.tar.gz

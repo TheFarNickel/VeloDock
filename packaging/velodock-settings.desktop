@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=VeloDock Settings
+Comment=Configure VeloDock styles, magnification, smoothness, and pinned apps
+Exec=velodock --settings
+Icon=velodock-settings
+Terminal=false
+Categories=Settings;DesktopSettings;
+StartupWMClass=io.github.velodock.App
+StartupNotify=false

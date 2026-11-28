@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=VeloDock
+Comment=Ultra-smooth desktop Dock for Arch Linux
+Exec=velodock
+Icon=velodock
+Terminal=false
+Categories=Utility;System;
+StartupNotify=false
