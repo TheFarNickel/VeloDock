@@ -1,6 +1,6 @@
 pkgbase = velodock-bin
 	pkgdesc = VeloDock — Ultra-smooth desktop Dock for Arch Linux (Wayland & X11) (precompiled binary)
-	pkgver = 0.3.2
+	pkgver = 0.3.3
 	pkgrel = 1
 	url = https://github.com/TheFarNickel/Velo-dock
 	arch = x86_64
@@ -12,7 +12,7 @@ pkgbase = velodock-bin
 	conflicts = velodock-git
 	options = !debug
 	options = !strip
-	source = velodock-0.3.2-x86_64.tar.gz::https://github.com/TheFarNickel/Velo-dock/releases/download/v0.3.2/velodock-0.3.2-x86_64.tar.gz
-	sha256sums = f4fa10191d1d0fa26c2b9c3ffe84a2fa72dfc522e640662312d82ae9eea779a4
+	source = velodock-0.3.3-x86_64.tar.gz::https://github.com/TheFarNickel/Velo-dock/releases/download/v0.3.3/velodock-0.3.3-x86_64.tar.gz
+	sha256sums = 1efb1b2c5abcad5dcfbaa923c9b4bfdff7240573ac5242da783b106298932eff
 
 pkgname = velodock-bin

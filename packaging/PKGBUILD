@@ -1,6 +1,6 @@
 # Maintainer: TheFarNickel
 pkgname=velodock
-pkgver=0.3.2
+pkgver=0.3.3
 pkgrel=1
 pkgdesc="VeloDock — Ultra-smooth desktop Dock for Arch Linux (Wayland & X11) with spring physics and 11 dock styles"
 arch=('x86_64' 'aarch64')

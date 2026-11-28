@@ -2637,36 +2637,31 @@ fn draw_utility_strip(
                 text_w = (area_w - art_sz - 28.0).max(60.0);
             }
 
-            let title = if m.title.chars().count() > 14 {
-                let cut: String = m.title.chars().take(13).collect();
-                format!("{cut}…")
-            } else {
-                m.title.clone()
-            };
-            cr.select_font_face("Sans", cairo::FontSlant::Normal, cairo::FontWeight::Bold);
-            cr.set_font_size(10.5);
-            if let Ok(ext) = cr.text_extents(&title) {
-                let tx = text_x + (text_w - ext.width()).max(0.0) * 0.5 - ext.x_bearing();
-                let ty = py + ph * 0.37;
-                cr.set_source_rgba(pal.tooltip_fg.0, pal.tooltip_fg.1, pal.tooltip_fg.2, 0.96);
-                cr.move_to(tx, ty);
-                let _ = cr.show_text(&title);
-            }
+            draw_pango_centered_text(
+                cr,
+                &m.title,
+                text_x,
+                py + ph * 0.20,
+                text_w,
+                10.0,
+                true,
+                (pal.tooltip_fg.0, pal.tooltip_fg.1, pal.tooltip_fg.2, 0.96),
+            );
 
             let btn_y = py + ph * 0.52;
             let btn_h = 20.0;
             let btn_w = 22.0;
             let cx = text_x + text_w * 0.5;
             let buttons = [
-                (cx - 34.0, "‹", WidgetAction::MediaPrev(m.bus_name.clone())),
+                (cx - 34.0, MediaBtnIcon::Prev, WidgetAction::MediaPrev(m.bus_name.clone())),
                 (
                     cx - 11.0,
-                    if m.playing { "⏸" } else { "▶" },
+                    if m.playing { MediaBtnIcon::Pause } else { MediaBtnIcon::Play },
                     WidgetAction::MediaPlayPause(m.bus_name.clone()),
                 ),
-                (cx + 12.0, "›", WidgetAction::MediaNext(m.bus_name.clone())),
+                (cx + 12.0, MediaBtnIcon::Next, WidgetAction::MediaNext(m.bus_name.clone())),
             ];
-            for (bx, glyph, act) in buttons {
+            for (bx, icon, act) in buttons {
                 let hovered = ptr
                     .map(|(mx, my)| mx >= bx && mx <= bx + btn_w && my >= btn_y && my <= btn_y + btn_h)
                     .unwrap_or(false);
@@ -2675,14 +2670,14 @@ fn draw_utility_strip(
                     cr.set_source_rgba(1.0, 1.0, 1.0, 0.20);
                     let _ = cr.fill();
                 }
-                cr.set_font_size(12.0);
-                if let Ok(ext) = cr.text_extents(glyph) {
-                    let tx = bx + (btn_w - ext.width()) * 0.5 - ext.x_bearing();
-                    let ty = btn_y + (btn_h + ext.height()) * 0.5;
-                    cr.set_source_rgba(pal.tooltip_fg.0, pal.tooltip_fg.1, pal.tooltip_fg.2, 0.96);
-                    cr.move_to(tx, ty);
-                    let _ = cr.show_text(glyph);
-                }
+                draw_media_btn_icon(
+                    cr,
+                    icon,
+                    bx + btn_w * 0.5,
+                    btn_y + btn_h * 0.5,
+                    9.0,
+                    (pal.tooltip_fg.0, pal.tooltip_fg.1, pal.tooltip_fg.2, 0.96),
+                );
                 hitboxes.push(WidgetHitbox {
                     x: bx,
                     y: btn_y,
@@ -2711,17 +2706,17 @@ fn draw_utility_strip(
         } else {
             let bx = px + (pw - 28.0) * 0.5;
             let by = cursor + 16.0;
-            let glyph = if m.playing { "⏸" } else { "▶" };
             rounded_rect(cr, bx, by, 28.0, 28.0, 8.0);
             cr.set_source_rgba(1.0, 1.0, 1.0, 0.14);
             let _ = cr.fill();
-            cr.select_font_face("Sans", cairo::FontSlant::Normal, cairo::FontWeight::Bold);
-            cr.set_font_size(13.0);
-            if let Ok(ext) = cr.text_extents(glyph) {
-                cr.set_source_rgba(pal.tooltip_fg.0, pal.tooltip_fg.1, pal.tooltip_fg.2, 0.95);
-                cr.move_to(bx + (28.0 - ext.width()) * 0.5 - ext.x_bearing(), by + (28.0 + ext.height()) * 0.5);
-                let _ = cr.show_text(glyph);
-            }
+            draw_media_btn_icon(
+                cr,
+                if m.playing { MediaBtnIcon::Pause } else { MediaBtnIcon::Play },
+                bx + 14.0,
+                by + 14.0,
+                10.5,
+                (pal.tooltip_fg.0, pal.tooltip_fg.1, pal.tooltip_fg.2, 0.95),
+            );
             hitboxes.push(WidgetHitbox {
                 x: bx,
                 y: by,
@@ -2980,6 +2975,98 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
         4 => (t, p, v),
         _ => (v, p, q),
     }
+}
+
+#[derive(Clone, Copy)]
+enum MediaBtnIcon {
+    Prev,
+    Play,
+    Pause,
+    Next,
+}
+
+fn draw_media_btn_icon(
+    cr: &cairo::Context,
+    icon: MediaBtnIcon,
+    cx: f64,
+    cy: f64,
+    size: f64,
+    rgba: (f64, f64, f64, f64),
+) {
+    let half = size * 0.5;
+    cr.set_source_rgba(rgba.0, rgba.1, rgba.2, rgba.3);
+    match icon {
+        MediaBtnIcon::Play => {
+            cr.new_sub_path();
+            cr.move_to(cx - half * 0.72, cy - half);
+            cr.line_to(cx + half * 0.92, cy);
+            cr.line_to(cx - half * 0.72, cy + half);
+            cr.close_path();
+            let _ = cr.fill();
+        }
+        MediaBtnIcon::Pause => {
+            let bar_w = (size * 0.28).max(2.2);
+            let gap = (size * 0.24).max(2.0);
+            let h = size * 0.92;
+            rounded_rect(cr, cx - gap * 0.5 - bar_w, cy - h * 0.5, bar_w, h, 1.0);
+            let _ = cr.fill();
+            rounded_rect(cr, cx + gap * 0.5, cy - h * 0.5, bar_w, h, 1.0);
+            let _ = cr.fill();
+        }
+        MediaBtnIcon::Prev => {
+            let bar_w = (size * 0.18).max(1.6);
+            let h = size * 0.84;
+            rounded_rect(cr, cx - half * 0.88, cy - h * 0.5, bar_w, h, 0.8);
+            let _ = cr.fill();
+            cr.new_sub_path();
+            cr.move_to(cx + half * 0.85, cy - h * 0.48);
+            cr.line_to(cx - half * 0.50, cy);
+            cr.line_to(cx + half * 0.85, cy + h * 0.48);
+            cr.close_path();
+            let _ = cr.fill();
+        }
+        MediaBtnIcon::Next => {
+            let bar_w = (size * 0.18).max(1.6);
+            let h = size * 0.84;
+            rounded_rect(cr, cx + half * 0.88 - bar_w, cy - h * 0.5, bar_w, h, 0.8);
+            let _ = cr.fill();
+            cr.new_sub_path();
+            cr.move_to(cx - half * 0.85, cy - h * 0.48);
+            cr.line_to(cx + half * 0.50, cy);
+            cr.line_to(cx - half * 0.85, cy + h * 0.48);
+            cr.close_path();
+            let _ = cr.fill();
+        }
+    }
+}
+
+fn draw_pango_centered_text(
+    cr: &cairo::Context,
+    text: &str,
+    x: f64,
+    y: f64,
+    max_w: f64,
+    font_size: f64,
+    bold: bool,
+    rgba: (f64, f64, f64, f64),
+) {
+    let layout = pangocairo::functions::create_layout(cr);
+    let mut desc = gtk4::pango::FontDescription::from_string("Sans");
+    desc.set_weight(if bold {
+        gtk4::pango::Weight::Bold
+    } else {
+        gtk4::pango::Weight::Normal
+    });
+    desc.set_absolute_size(font_size * gtk4::pango::SCALE as f64);
+    layout.set_font_description(Some(&desc));
+    layout.set_width((max_w.max(10.0) * gtk4::pango::SCALE as f64) as i32);
+    layout.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+    layout.set_alignment(gtk4::pango::Alignment::Center);
+    layout.set_single_paragraph_mode(true);
+    layout.set_text(text);
+    cr.set_source_rgba(rgba.0, rgba.1, rgba.2, rgba.3);
+    cr.move_to(x, y);
+    pangocairo::functions::show_layout(cr, &layout);
 }
 
 fn rounded_rect(cr: &cairo::Context, x: f64, y: f64, w: f64, h: f64, r: f64) {
